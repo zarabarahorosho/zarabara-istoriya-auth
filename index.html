@@ -19,8 +19,13 @@
 <script>
   // Страница ничего не сохраняет и никуда не отправляет:
   // она только передаёт ответ VK программе на этом же компьютере.
-  var target = 'http://localhost:53682/vk' + window.location.search + window.location.hash.replace(/^#/, window.location.search ? '&' : '?');
-  window.location.replace(target);
+  var params = window.location.search + window.location.hash.replace(/^#/, window.location.search ? '&' : '?');
+  if (/[?&](code|payload|error)=/.test(params)) {
+    window.location.replace('http://localhost:53682/vk' + params);
+  } else {
+    document.querySelector('h2').textContent = 'Страница входа VK для программы ZARABARA ИСТОРИЯ';
+    document.querySelector('p').textContent = 'Её не нужно открывать вручную: она срабатывает сама, когда ты нажимаешь «Войти через VK» в программе.';
+  }
 </script>
 </body>
 </html>
