@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>ZARABARA ИСТОРИЯ · вход VK</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       font-family:system-ui,sans-serif;background:#111;color:#e8c46a;text-align:center;padding:16px}
+  a{color:#f5d77f}
+</style>
+</head>
+<body>
+<div>
+  <h2>Передаю вход в программу ZARABARA ИСТОРИЯ…</h2>
+  <p>Если ничего не произошло, проверь, что программа открыта и окно подключения VK ждёт входа.</p>
+</div>
+<script>
+  // Страница ничего не сохраняет и никуда не отправляет:
+  // она только передаёт ответ VK программе на этом же компьютере.
+  var target = 'http://localhost:53682/vk' + window.location.search + window.location.hash.replace(/^#/, window.location.search ? '&' : '?');
+  window.location.replace(target);
+</script>
+</body>
+</html>
