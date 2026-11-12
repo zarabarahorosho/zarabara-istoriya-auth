@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>ZARABARA ИСТОРИЯ · подключение личного VK</title>
+  <link rel="stylesheet" href="mini.css">
+  <script defer src="vendor/vk-bridge-3.0.2.min.js"></script>
+  <script defer src="mini-auth.js"></script>
+  <script defer src="mini-ui.js"></script>
+</head>
+<body>
+  <main>
+    <p class="brand">ZARABARA <span>ИСТОРИЯ</span></p>
+    <p class="tag">ПОДКЛЮЧЕНИЕ ЛИЧНОГО VK</p>
+    <h1>Твои истории.<br>Твой профиль.</h1>
+    <p class="intro">Подключи истории через собственное мини-приложение VK. Этот способ ещё нужно проверить на твоём аккаунте.</p>
+    <div class="status" id="status" role="status" aria-live="polite">Проверяем, открыта ли страница внутри VK…</div>
+    <button id="authorize" disabled>Разрешить доступ к историям</button>
+    <p class="hint">VK покажет запрос разрешения. Подключение ничего не публикует.</p>
+    <section id="result" hidden>
+      <label for="token">Ключ твоего профиля</label>
+      <input id="token" type="password" readonly autocomplete="off" spellcheck="false" aria-describedby="token-help">
+      <p id="token-help">Вставь ключ в программе: Аккаунты → VK · личная страница → Своё мини-приложение.</p>
+      <div class="actions">
+        <button id="copy" disabled>Скопировать ключ</button>
+        <button id="reveal" class="secondary" disabled>Показать</button>
+        <button id="clear" class="secondary">Очистить</button>
+      </div>
+      <p class="hint" id="expiry"></p>
+    </section>
+    <p class="privacy">Ключ остаётся в памяти этой страницы до закрытия или очистки. Страница не сохраняет его в браузере и не отправляет на сервер ZARABARA. Пароль VK здесь не вводится.</p>
+  </main>
+</body>
+</html>
