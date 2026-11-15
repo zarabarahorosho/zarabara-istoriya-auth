@@ -4,6 +4,7 @@
   const byId = id => document.getElementById(id);
   const status = byId('status');
   const authorize = byId('authorize');
+  const retry = byId('retry');
   const copy = byId('copy');
   const reveal = byId('reveal');
   const field = byId('token');
@@ -21,17 +22,19 @@
     reveal.disabled = copy.disabled = true;
     byId('result').hidden = true;
   }
-  function bounded(promise) {
+  function bounded(promise, stage = 'auth') {
     let timer;
     const deadline = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error('timeout')), 25000);
+      timer = setTimeout(() => reject(api.timeoutError(stage)), stage === 'auth' ? 120000 : 12000);
     });
     return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
   }
   authorize.addEventListener('click', async () => {
+    if (!context || authorize.disabled) return;
     clear();
     const currentAttempt = attempt;
     authorize.disabled = true;
+    retry.disabled = true;
     status.textContent = 'Подтверди в окне VK доступ к историям своего профиля…';
     try {
       const response = await bounded(window.vkBridge.send('VKWebAppGetAuthToken', {
@@ -54,13 +57,20 @@
     } catch (error) {
       if (currentAttempt === attempt) status.textContent = api.errorMessage(error);
     } finally {
-      authorize.disabled = false;
+      if (currentAttempt === attempt) {
+        authorize.disabled = !context;
+        retry.disabled = false;
+      }
     }
   });
   copy.addEventListener('click', async () => {
     if (!token) return;
     try {
-      await navigator.clipboard.writeText(token);
+      try {
+        await navigator.clipboard.writeText(token);
+      } catch (_) {
+        await bounded(window.vkBridge.send('VKWebAppCopyText', { text: token }), 'copy');
+      }
       status.textContent = 'Ключ скопирован. Вставь его в поле «Ключ личного профиля» в программе ZARABARA ИСТОРИЯ.';
     } catch (_) {
       status.textContent = 'Браузер не разрешил копирование. Нажми «Показать» и скопируй ключ вручную. В чат ключ отправлять не нужно.';
@@ -75,17 +85,37 @@
     status.textContent = 'Ключ убран со страницы. Уже выданный доступ можно отозвать в настройках VK.';
   });
   window.addEventListener('pagehide', clear);
-  (async () => {
+  async function initialize() {
+    clear();
+    const currentAttempt = attempt;
+    context = null;
+    authorize.disabled = retry.disabled = true;
     try {
       const embedded = Boolean(window.vkBridge && window.vkBridge.isEmbedded());
-      context = api.launchContext(window.location.search, embedded);
-      if (!window.vkBridge) throw new Error('bridge unavailable');
-      await bounded(window.vkBridge.send('VKWebAppInit'));
+      if (!embedded) api.launchContext(window.location.search, false);
+      status.textContent = 'Запускаю мини-приложение и ожидаю ответ VK…';
+      // Notify the VK shell first: rejecting missing URL parameters before Init
+      // leaves its loading screen covering this page indefinitely.
+      await bounded(window.vkBridge.send('VKWebAppInit'), 'init');
+      if (currentAttempt !== attempt) return;
+      let resolved;
+      try { resolved = api.launchContext(window.location.search, true); }
+      catch (_) {
+        resolved = api.bridgeContext(await bounded(window.vkBridge.send('VKWebAppGetLaunchParams'), 'params'));
+      }
+      if (currentAttempt !== attempt) return;
+      context = resolved;
       status.textContent = 'Открыто своё мини-приложение №' + context.appId + '. VK-профиль №' + context.userId + '. Можно запросить доступ только к историям.';
       authorize.disabled = false;
     } catch (error) {
-      status.textContent = api.errorMessage(error);
-      authorize.disabled = true;
+      if (currentAttempt === attempt) {
+        status.textContent = api.errorMessage(error);
+        authorize.disabled = true;
+      }
+    } finally {
+      if (currentAttempt === attempt) retry.disabled = false;
     }
-  })();
+  }
+  retry.addEventListener('click', initialize);
+  initialize();
 })();
