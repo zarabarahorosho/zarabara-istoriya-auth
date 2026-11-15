@@ -46,7 +46,8 @@
       field.value = token;
       byId('result').hidden = false;
       reveal.disabled = copy.disabled = false;
-      status.textContent = 'VK вернул ключ с разрешением «Истории». Программа дополнительно проверит профиль и доступ через API. Ничего не опубликовано.';
+      status.textContent = 'Ключ с разрешением «Истории» готов. Нажми «Скопировать ключ» ниже и вставь его в программу. Ничего не опубликовано.';
+      byId('result').scrollIntoView?.({block:'center',behavior:'auto'});
       byId('expiry').textContent = granted.expiresSeconds ?
         'VK указал срок ключа: ' + Math.ceil(granted.expiresSeconds / 60) + ' мин. После истечения получи новый ключ.' :
         'Срок ключа VK не указал. Если программа сообщит, что он истёк, получи ключ заново.';
