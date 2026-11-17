@@ -9,11 +9,13 @@
   const reveal = byId('reveal');
   const field = byId('token');
   let token = '';
+  let copyValue = '';
   let attempt = 0;
   let expiryTimer;
   let context;
   function clear() {
     token = '';
+    copyValue = '';
     attempt += 1;
     clearTimeout(expiryTimer);
     field.value = '';
@@ -43,6 +45,7 @@
       if (currentAttempt !== attempt) return;
       const granted = api.authorization(response);
       token = granted.token;
+      copyValue = api.copyPacket(granted);
       field.value = token;
       byId('result').hidden = false;
       reveal.disabled = copy.disabled = false;
@@ -68,9 +71,9 @@
     if (!token) return;
     try {
       try {
-        await navigator.clipboard.writeText(token);
+        await navigator.clipboard.writeText(copyValue);
       } catch (_) {
-        await bounded(window.vkBridge.send('VKWebAppCopyText', { text: token }), 'copy');
+        await bounded(window.vkBridge.send('VKWebAppCopyText', { text: copyValue }), 'copy');
       }
       status.textContent = 'Ключ скопирован. Вставь его в поле «Ключ личного профиля» в программе ZARABARA ИСТОРИЯ.';
     } catch (_) {

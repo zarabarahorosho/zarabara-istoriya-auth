@@ -33,6 +33,10 @@
       vk_app_id: String(params.vk_app_id || ''), vk_user_id: String(params.vk_user_id || '')
     }), true);
   }
+  function copyPacket(granted) {
+    return JSON.stringify({zarabara_vk:1,token:granted.token,
+      expires_at:granted.expiresSeconds ? Math.floor(Date.now()/1000)+granted.expiresSeconds : null});
+  }
   function timeoutError(stage) {
     return new AuthError({
       init: 'VK не подтвердил запуск мини-приложения. Нажми «Повторить запуск». Если загрузка снова зависнет, закрой вкладку приложения и открой её заново.',
@@ -47,5 +51,5 @@
     return 'VK не выдал ключ. Подключение не завершено.' +
       (Number.isSafeInteger(code) ? ' Код ' + code + '.' : '');
   }
-  return { launchContext, bridgeContext, authorization, timeoutError, errorMessage };
+  return { launchContext, bridgeContext, authorization, copyPacket, timeoutError, errorMessage };
 });
