@@ -40,6 +40,34 @@
     return JSON.stringify({zarabara_vk:1,token:granted.token,
       expires_at:granted.expiresSeconds ? Math.floor(Date.now()/1000)+granted.expiresSeconds : null});
   }
+  function initialize(bridge, host) {
+    // VK Bridge learns webFrameId from VKWebAppSettings. If Init went out
+    // before that event, the shell can leave its loading overlay in place.
+    // Retry ONLY Init, once, after the official SDK has received settings.
+    let closed = false, sends = 0, resolve, reject;
+    const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+    function cancel() {
+      closed = true;
+      host.removeEventListener?.('message', settings);
+    }
+    function send() {
+      if (closed || sends >= 2) return;
+      sends += 1;
+      Promise.resolve().then(() => bridge.send('VKWebAppInit')).then(value => {
+        if (!closed) { cancel(); resolve(value); }
+      }, error => {
+        if (!closed) { cancel(); reject(error); }
+      });
+    }
+    function settings(event) {
+      if (event.source !== host.parent || !/^https:\/\/(?:[a-z0-9-]+\.)*vk\.(?:com|ru)$/.test(event.origin || '') ||
+          event.data?.type !== 'VKWebAppSettings') return;
+      send();
+    }
+    host.addEventListener('message', settings);
+    send();
+    return { promise, cancel };
+  }
   function timeoutError(stage) {
     return new AuthError({
       init: 'VK не подтвердил запуск мини-приложения. Нажми «Повторить запуск». Если загрузка снова зависнет, закрой вкладку приложения и открой её заново.',
@@ -54,5 +82,5 @@
     return 'VK не выдал ключ. Подключение не завершено.' +
       (Number.isSafeInteger(code) ? ' Код ' + code + '.' : '');
   }
-  return { launchContext, bridgeContext, authorization, copyPacket, timeoutError, errorMessage };
+  return { launchContext, bridgeContext, authorization, copyPacket, initialize, timeoutError, errorMessage };
 });

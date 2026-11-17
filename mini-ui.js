@@ -100,7 +100,9 @@
       status.textContent = 'Запускаю мини-приложение и ожидаю ответ VK…';
       // Notify the VK shell first: rejecting missing URL parameters before Init
       // leaves its loading screen covering this page indefinitely.
-      await bounded(window.vkBridge.send('VKWebAppInit'), 'init');
+      const startup = api.initialize(window.vkBridge, window);
+      try { await bounded(startup.promise, 'init'); }
+      finally { startup.cancel(); }
       if (currentAttempt !== attempt) return;
       let resolved;
       try { resolved = api.launchContext(window.location.search, true); }
