@@ -4,6 +4,7 @@
   const byId = id => document.getElementById(id);
   const status = byId('status');
   const authorize = byId('authorize');
+  const authorizeVideo = byId('authorize-video');
   const retry = byId('retry');
   const copy = byId('copy');
   const reveal = byId('reveal');
@@ -31,16 +32,16 @@
     });
     return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
   }
-  authorize.addEventListener('click', async () => {
+  async function authorizeScope(scope) {
     if (!context || authorize.disabled) return;
     clear();
     const currentAttempt = attempt;
-    authorize.disabled = true;
+    authorize.disabled = authorizeVideo.disabled = true;
     retry.disabled = true;
-    status.textContent = 'Подтверди в окне VK доступ к историям своего профиля…';
+    status.textContent = scope.includes('video') ? 'Подтверди в окне VK доступ к историям и видео своего профиля…' : 'Подтверди в окне VK доступ к историям своего профиля…';
     try {
       const response = await bounded(window.vkBridge.send('VKWebAppGetAuthToken', {
-        app_id: context.appId, scope: 'stories'
+        app_id: context.appId, scope
       }));
       if (currentAttempt !== attempt) return;
       const granted = api.authorization(response);
@@ -49,7 +50,9 @@
       field.value = token;
       byId('result').hidden = false;
       reveal.disabled = copy.disabled = false;
-      status.textContent = 'Ключ с разрешением «Истории» готов. Нажми «Скопировать ключ» ниже и вставь его в программу. Ничего не опубликовано.';
+      status.textContent = (granted.videoGranted ? 'Ключ с разрешениями «Истории» и «Видео» готов.' :
+        scope.includes('video') ? 'VK выдал только «Истории». Право «Видео» пока не получено.' : 'Ключ с разрешением «Истории» готов.') +
+        ' Нажми «Скопировать ключ» ниже и вставь его в программу. Ничего не опубликовано.';
       byId('result').scrollIntoView?.({block:'center',behavior:'auto'});
       byId('expiry').textContent = granted.expiresSeconds ?
         'VK указал срок ключа: ' + Math.ceil(granted.expiresSeconds / 60) + ' мин. После истечения получи новый ключ.' :
@@ -63,10 +66,13 @@
     } finally {
       if (currentAttempt === attempt) {
         authorize.disabled = !context;
+        authorizeVideo.disabled = !context;
         retry.disabled = false;
       }
     }
-  });
+  }
+  authorize.addEventListener('click', () => authorizeScope('stories'));
+  authorizeVideo.addEventListener('click', () => authorizeScope('stories,video'));
   copy.addEventListener('click', async () => {
     if (!token) return;
     try {
@@ -93,7 +99,7 @@
     clear();
     const currentAttempt = attempt;
     context = null;
-    authorize.disabled = retry.disabled = true;
+    authorize.disabled = authorizeVideo.disabled = retry.disabled = true;
     try {
       const embedded = Boolean(window.vkBridge && window.vkBridge.isEmbedded());
       if (!embedded) api.launchContext(window.location.search, false);
@@ -111,12 +117,12 @@
       }
       if (currentAttempt !== attempt) return;
       context = resolved;
-      status.textContent = 'Открыто своё мини-приложение №' + context.appId + '. VK-профиль №' + context.userId + '. Можно запросить доступ только к историям.';
-      authorize.disabled = false;
+      status.textContent = 'Открыто своё мини-приложение №' + context.appId + '. VK-профиль №' + context.userId + '. Выбери доступ к историям или к историям и видео.';
+      authorize.disabled = authorizeVideo.disabled = false;
     } catch (error) {
       if (currentAttempt === attempt) {
         status.textContent = api.errorMessage(error);
-        authorize.disabled = true;
+        authorize.disabled = authorizeVideo.disabled = true;
       }
     } finally {
       if (currentAttempt === attempt) retry.disabled = false;

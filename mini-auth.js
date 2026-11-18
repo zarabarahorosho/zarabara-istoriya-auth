@@ -28,7 +28,7 @@
     // Handle a returned deadline as well as a duration, without inventing a
     // multi-decade lifetime when a client reports Unix time.
     const seconds = raw > 1e9 ? Math.max(0, Math.floor((raw > 1e12 ? raw / 1000 : raw) - Date.now()/1000)) : raw;
-    return { token: result.access_token, expiresSeconds: Number.isFinite(seconds) && seconds > 0 ? seconds : null };
+    return { token: result.access_token, videoGranted: scopes.includes('video'), expiresSeconds: Number.isFinite(seconds) && seconds > 0 ? seconds : null };
   }
   function bridgeContext(params) {
     params = params && typeof params === 'object' ? params : {};

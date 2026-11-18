@@ -6,19 +6,20 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; base-uri 'none'; form-action 'none'">
   <title>ZARABARA ИСТОРИЯ · подключение личного VK</title>
-  <link rel="stylesheet" href="mini.css?v=20261117-2">
+  <link rel="stylesheet" href="mini.css?v=20261118-video1">
   <script defer src="vendor/vk-bridge-3.0.2.min.js"></script>
-  <script defer src="mini-auth.js?v=20261117-2"></script>
-  <script defer src="mini-ui.js?v=20261117-2"></script>
+  <script defer src="mini-auth.js?v=20261118-video1"></script>
+  <script defer src="mini-ui.js?v=20261118-video1"></script>
 </head>
 <body>
   <main>
     <p class="brand">ZARABARA <span>ИСТОРИЯ</span></p>
     <p class="tag">ПОДКЛЮЧЕНИЕ ЛИЧНОГО VK</p>
     <h1>Твои истории.<br>Твой профиль.</h1>
-    <p class="intro">Разреши программе размещать истории в твоём личном профиле VK. Подключение выполняй на том же компьютере, где работает программа.</p>
+    <p class="intro">Выбери доступ к историям или к историям и обычным видео в твоём личном профиле VK. Подключение выполняй на том же компьютере, где работает программа.</p>
     <div class="status" id="status" role="status" aria-live="polite">Проверяем, открыта ли страница внутри VK…</div>
     <button id="authorize" disabled>Разрешить доступ к историям</button>
+    <button id="authorize-video" disabled>Разрешить истории и видео</button>
     <button id="retry" class="secondary" disabled>Повторить запуск</button>
     <p class="hint">Если открыт серый экран VK, сначала проверь вход в ленте. Для нового ключа не нужно создавать приложение или заходить в кабинет разработчика.</p>
     <p class="hint"><a href="https://vk.ru/app54894967" target="_blank" rel="noopener noreferrer">Открыть подключение внутри VK</a> · <a href="https://vk.ru/feed" target="_blank" rel="noopener noreferrer">Проверить вход в VK</a></p>
@@ -28,7 +29,7 @@
     <section id="result" hidden>
       <label for="token">Ключ твоего профиля</label>
       <input id="token" type="password" readonly autocomplete="off" spellcheck="false" aria-describedby="token-help">
-      <p id="token-help">Вставь скопированный пакет в программе версии 0.34.0: Аккаунты → VK · личная страница → Своё мини-приложение. В пакете есть ключ и срок VK. В старой версии можно скопировать только показанный ниже ключ вручную.</p>
+      <p id="token-help">Вставь скопированный пакет в программе: Аккаунты → VK · Истории или VK · Личные видео → Своё мини-приложение. Обе карточки используют один вход. Для обычных видео нужна кнопка «Разрешить истории и видео». В пакете есть ключ и срок VK.</p>
       <div class="actions">
         <button id="copy" disabled>Скопировать ключ</button>
         <button id="reveal" class="secondary" disabled>Показать</button>
